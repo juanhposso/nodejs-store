@@ -1,23 +1,16 @@
 const express = require('express');
 const App = express();
-const apiV1 = '/api/v1';
 const PORT = 3000;
+const routerAPI = require('./routes');
 
+// * Escuchar y activar el server
 App.listen(PORT);
 
-// Products Router
-const productsRouter = require('./routes/Products');
+App.use(express.json());
 
-//Categories Router
-const categoriesRouter = require('./routes/Categories');
-
-// Error404 Router
-const error404 = require('./routes/Error404');
-
+// * Redireccion en caso de solicitar el root del server
 App.get('/', (req, res) => {
-	res.redirect(`${apiV1}/products`);
+	res.redirect('/api/v1/products');
 });
 
-App.use(`${apiV1}/products`, productsRouter);
-App.use(`${apiV1}/categories`, categoriesRouter);
-App.use('/404', error404);
+routerAPI(App);
