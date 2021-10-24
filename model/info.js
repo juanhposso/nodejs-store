@@ -5505,7 +5505,12 @@ const createNewItemPostTesting = () => {
 	};
 };
 
+const newitemID = () => {
+	return { uuid: faker.datatype.uuid() };
+};
+
 module.exports = {
 	infoJSON,
+	newitemID,
 	createNewItemPostTesting,
 };

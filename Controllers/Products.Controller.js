@@ -1,10 +1,12 @@
-const API = require('../model/info');
+const Services = require('../services/products.services');
+
+const servicesProduct = new Services();
 
 // * GET
 const getInfo = (req, res) => {
 	const limit = req.query.size == 0 ? 10 : req.query.size || 10;
 
-	const arrayInfo = API.infoJSON.slice(0, limit);
+	const arrayInfo = servicesProduct.obtenerInfo(limit);
 
 	res.json(arrayInfo);
 };
@@ -13,9 +15,7 @@ const getInfo = (req, res) => {
 const filterById = (req, res) => {
 	const { idProduct } = req.params;
 
-	const itemFiltered = API.infoJSON.find((item) => {
-		return item.id == idProduct || item.iduii == idProduct;
-	});
+	const itemFiltered = servicesProduct.findById(idProduct);
 
 	itemFiltered
 		? res.status(200).json(itemFiltered)
@@ -25,7 +25,7 @@ const filterById = (req, res) => {
 // * POST
 const createItem = (req, res) => {
 	const body = req.body;
-	API.infoJSON.push(body);
+	servicesProduct.createNewItem(body);
 
 	res.status(201).json({
 		message: 'created Item',
@@ -38,17 +38,9 @@ const updatedItem = (req, res) => {
 	const { idProduct } = req.params;
 	const body = req.body;
 
-	const itemFiltered = API.infoJSON.find((item) => {
-		return item.id == idProduct || item.iduii == idProduct;
-	});
+	const itemFiltered = servicesProduct.itemUpdated(idProduct, body);
 
 	if (itemFiltered) {
-		for (const key in itemFiltered) {
-			if (itemFiltered.hasOwnProperty.call(body, key)) {
-				itemFiltered[key] = body[key];
-			}
-		}
-
 		res.json({
 			message: 'Updated Item',
 			datachange: body,
@@ -65,15 +57,24 @@ const updatedItem = (req, res) => {
 const itemDelete = (req, res) => {
 	const { idProduct } = req.params;
 
-	res.json({
-		message: 'Delete item',
-		deleteID: idProduct,
-	});
+	const item = servicesProduct.itemDeleted(idProduct);
+
+	if (item != -1) {
+		res.json({
+			message: 'Delete item',
+			deleteID: idProduct,
+		});
+	} else {
+		res.json({
+			message: 'cant delete item',
+			deleteID: idProduct,
+		});
+	}
 };
 
 // ! In order to get new item to test POST
 const createNewItemTestingPost = (req, res) => {
-	const getInfo = API.createNewItemPostTesting();
+	const getInfo = servicesProduct.createNewItemPostForTesting();
 
 	res.json(getInfo);
 };

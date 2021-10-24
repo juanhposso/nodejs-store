@@ -13,4 +13,12 @@ App.get('/', (req, res) => {
 	res.redirect('/api/v1/products');
 });
 
+App.get('/api/', (req, res) => {
+	res.redirect('/api/v1/products');
+});
+
+App.get('/api/v1', (req, res) => {
+	res.redirect('/api/v1/products');
+});
+
 routerAPI(App);
