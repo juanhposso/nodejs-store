@@ -1,4 +1,5 @@
 const API = require('../model/info');
+const boom = require('@hapi/boom');
 
 class productServices {
 	constructor() {
@@ -7,40 +8,55 @@ class productServices {
 	}
 
 	obtenerInfo(limit) {
-		return this.products.slice(0, limit);
-	}
-
-	findById(idProduct) {
-		return API.infoJSON.find((item) => {
-			return item.id == idProduct || item.iduii == idProduct;
+		return new Promise((resolve, reject) => {
+			try {
+				setTimeout(() => {
+					resolve(this.products.slice(0, limit));
+				}, 500);
+			} catch (error) {
+				reject(boom.badRequest(error));
+			}
 		});
 	}
 
-	createNewItem(item) {
-		const newItem = {
-			iduii: API.newitemID(),
-			id: API.infoJSON.length + 1,
-			...item,
-		};
-		return API.infoJSON.push(newItem);
-	}
-
-	itemUpdated(idProduct, body) {
-		const itemFiltered = API.infoJSON.find((item) => {
+	findById(idProduct) {
+		const itemFiltered = this.products.find((item) => {
 			return item.id == idProduct || item.iduii == idProduct;
 		});
 
 		if (itemFiltered) {
-			for (const key in itemFiltered) {
-				if (itemFiltered.hasOwnProperty.call(body, key)) {
-					itemFiltered[key] = body[key];
-				}
-			}
-
 			return itemFiltered;
 		}
 
-		return false;
+		throw boom.notFound('product not found');
+	}
+
+	createNewItem(item) {
+		const newItem = {
+			...API.newitemID(),
+			id: API.infoJSON.length + 1,
+			...item,
+		};
+		return this.products.push(newItem);
+	}
+
+	itemUpdated(idProduct, body) {
+		const index = API.infoJSON.findIndex((item) => {
+			return item.id == idProduct || item.iduii == idProduct;
+		});
+
+		if (index === -1) {
+			throw boom.notFound('Item not found');
+		}
+
+		const product = this.products[index];
+
+		this.products[index] = {
+			...product,
+			...body,
+		};
+
+		return this.products[index];
 	}
 
 	createNewItemPostForTesting() {
@@ -55,9 +71,13 @@ class productServices {
 			}
 		});
 
-		API.infoJSON.splice(index, 1);
+		if (index === -1) {
+			throw new Error('Item not found');
+		}
 
-		return index;
+		this.products.splice(index, 1);
+
+		return { idProduct };
 	}
 }
 

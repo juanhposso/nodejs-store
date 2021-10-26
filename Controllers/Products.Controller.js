@@ -3,23 +3,25 @@ const Services = require('../services/products.services');
 const servicesProduct = new Services();
 
 // * GET
-const getInfo = (req, res) => {
-	const limit = req.query.size == 0 ? 10 : req.query.size || 10;
+const getInfo = async (req, res, next) => {
+	try {
+		const limit = req.query.size <= 0 ? 10 : req.query.size || 10;
 
-	const arrayInfo = servicesProduct.obtenerInfo(limit);
+		const arrayInfo = await servicesProduct.obtenerInfo(limit);
 
-	res.json(arrayInfo);
+		res.json(arrayInfo);
+	} catch (error) {
+		next(error);
+	}
 };
 
 // * GET
-const filterById = (req, res) => {
+const filterById = (req, res, next) => {
 	const { idProduct } = req.params;
 
 	const itemFiltered = servicesProduct.findById(idProduct);
 
-	itemFiltered
-		? res.status(200).json(itemFiltered)
-		: res.redirect('/api/v1/404');
+	itemFiltered ? res.status(200).json(itemFiltered) : next(error);
 };
 
 // * POST
@@ -40,17 +42,12 @@ const updatedItem = (req, res) => {
 
 	const itemFiltered = servicesProduct.itemUpdated(idProduct, body);
 
-	if (itemFiltered) {
-		res.json({
-			message: 'Updated Item',
-			datachange: body,
-			newItem: itemFiltered,
-		});
-	} else {
-		res.json({
-			message: 'Item you are choosing isnt available',
-		});
-	}
+	res.json({
+		message: 'Updated Item',
+		dataChanging: body,
+		FromItem: idProduct,
+		newItem: itemFiltered,
+	});
 };
 
 // * DELETE
@@ -59,17 +56,10 @@ const itemDelete = (req, res) => {
 
 	const item = servicesProduct.itemDeleted(idProduct);
 
-	if (item != -1) {
-		res.json({
-			message: 'Delete item',
-			deleteID: idProduct,
-		});
-	} else {
-		res.json({
-			message: 'cant delete item',
-			deleteID: idProduct,
-		});
-	}
+	res.json({
+		message: 'Item deleted',
+		deleteID: item,
+	});
 };
 
 // ! In order to get new item to test POST

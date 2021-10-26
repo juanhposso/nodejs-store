@@ -2,6 +2,11 @@ const express = require('express');
 const App = express();
 const PORT = 3000;
 const routerAPI = require('./routes');
+const {
+	logErrors,
+	errorHandler,
+	boomErrorHandler,
+} = require('./middlewares/error.handlers');
 
 // * Escuchar y activar el server
 App.listen(PORT);
@@ -22,3 +27,8 @@ App.get('/api/v1', (req, res) => {
 });
 
 routerAPI(App);
+
+// ! HANDLER-ERRORS
+App.use(logErrors);
+App.use(boomErrorHandler);
+App.use(errorHandler);
