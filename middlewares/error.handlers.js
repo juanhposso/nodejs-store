@@ -1,13 +1,10 @@
 //const boom = require('@hapi/boom');
 
 const logErrors = (err, req, res, next) => {
-	console.log('este es el LOG-ERRORS');
-	console.log(err);
 	next(err);
 };
 
 const errorHandler = (err, req, res, next) => {
-	console.log('ERROR-HANDLER');
 	res.json({
 		message: err.message,
 		stack: err.stack,

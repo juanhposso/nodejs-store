@@ -5,7 +5,7 @@ const servicesProduct = new Services();
 // * GET
 const getInfo = async (req, res, next) => {
 	try {
-		const limit = req.query.size <= 0 ? 10 : req.query.size || 10;
+		const limit = req.query.size ? req.query.size : 10;
 
 		const arrayInfo = await servicesProduct.obtenerInfo(limit);
 
@@ -16,31 +16,36 @@ const getInfo = async (req, res, next) => {
 };
 
 // * GET
-const filterById = (req, res, next) => {
+const filterById = async (req, res, next) => {
 	const { idProduct } = req.params;
 
-	const itemFiltered = servicesProduct.findById(idProduct);
+	const itemFiltered = await servicesProduct.findById(idProduct);
 
 	itemFiltered ? res.status(200).json(itemFiltered) : next(error);
 };
 
 // * POST
-const createItem = (req, res) => {
-	const body = req.body;
-	servicesProduct.createNewItem(body);
+const createItem = async (req, res) => {
+	try {
+		const body = req.body;
+		const newProduct = await servicesProduct.createNewItem(body);
 
-	res.status(201).json({
-		message: 'created Item',
-		data: body,
-	});
+		res.status(201).json({
+			message: 'created Item',
+			data: body,
+			newProduct,
+		});
+	} catch (error) {
+		next(error);
+	}
 };
 
 // * PATCH
-const updatedItem = (req, res) => {
+const updatedItem = async (req, res) => {
 	const { idProduct } = req.params;
 	const body = req.body;
 
-	const itemFiltered = servicesProduct.itemUpdated(idProduct, body);
+	const itemFiltered = await servicesProduct.itemUpdated(idProduct, body);
 
 	res.json({
 		message: 'Updated Item',
@@ -51,10 +56,10 @@ const updatedItem = (req, res) => {
 };
 
 // * DELETE
-const itemDelete = (req, res) => {
+const itemDelete = async (req, res) => {
 	const { idProduct } = req.params;
 
-	const item = servicesProduct.itemDeleted(idProduct);
+	const item = await servicesProduct.itemDeleted(idProduct);
 
 	res.json({
 		message: 'Item deleted',
